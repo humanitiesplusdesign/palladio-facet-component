@@ -1,0 +1,25 @@
+{
+  "name": "palladio-facet-component",
+  "description": "Facet filter component for Palladio",
+  "main": [
+    "dist/palladio-facet-component.min.js",
+    "dist/palladio-facet-component.css"
+  ],
+  "authors": [
+    "Ethan Jewett <ethan.jewett@coredatra.com>"
+  ],
+  "license": "BSD-3-Clause",
+  "keywords": [
+    "palladio",
+    "visualization"
+  ],
+  "moduleType": [],
+  "homepage": "http://hdlab.stanford.edu/palladio/",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
