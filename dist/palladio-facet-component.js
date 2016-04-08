@@ -44,7 +44,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 
 		componentService.register('facet', compileStringFunction);
 	}])
-	.directive('palladioFacetFilter', function (palladioService, dataService) {
+	.directive('palladioFacetFilter', ['palladioService', 'dataService', function (palladioService, dataService) {
 		return {
 			scope : {
 				height: '=',
@@ -651,7 +651,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 				}
 			}
 		};
-	});
+	}]);
 
 function elastic_list() {
 
