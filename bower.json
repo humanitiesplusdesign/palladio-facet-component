@@ -2,7 +2,7 @@
   "name": "palladio-facet-component",
   "description": "Facet filter component for Palladio",
   "main": [
-    "dist/palladio-facet-component.min.js",
+    "dist/palladio-facet-component.js",
     "dist/palladio-facet-component.css"
   ],
   "authors": [
@@ -13,6 +13,9 @@
     "palladio",
     "visualization"
   ],
+  "dependencies": {
+    "palladio": ">=1.2.0-beta.10"
+  },
   "moduleType": [],
   "homepage": "http://hdlab.stanford.edu/palladio/",
   "ignore": [
