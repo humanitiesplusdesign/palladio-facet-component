@@ -243,7 +243,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 								.style('height', function() { return scope.calcHeight; })
 								.attr('class', 'facet-container');
 								
-						var buttonGroup = facetContainers
+						var buttonGroup = newFacetContainers
 							.append('div')
 								.classed('facet-header', true)
 								.style('height', headerHeight)
