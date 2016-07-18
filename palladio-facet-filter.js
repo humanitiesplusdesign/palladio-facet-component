@@ -12,6 +12,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			//		dimensions: []
 			//		aggregation: []
 			//		height: 300px
+			//    onRemove: function() { ... }
 
 			newScope.showControls = newScope.showControls === undefined ? true : newScope.showControls;
 			newScope.showAccordion = newScope.showAccordion === undefined ? true : newScope.showAccordion;
@@ -20,6 +21,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			newScope.dimensions = newScope.dimensions === undefined ? [] : newScope.dimensions;
 			newScope.aggregation = newScope.aggregation === undefined ? [] : newScope.aggregation;
 			newScope.height = newScope.height === undefined ? "300px" : newScope.height;
+			newScope.onRemove = newScope.onRemove === undefined ? function() {} : newScope.onRemove;
 
 			var compileString = '<div data-palladio-facet-filter ';
 
@@ -28,6 +30,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			compileString += 'show-drop-area=showDropArea ';
 			compileString += 'show-settings=showSettings ';
 			compileString += 'height=height ';
+			compileString += 'on-remove=onRemove() ';
 
 			if(newScope.dimensions.length > 0) {
 				compileString += 'config-dimensions="dimensions" ';
@@ -41,8 +44,24 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 
 			return compileString;
 		};
+		
+		var compileSettingsFunction = function() {
+			return '<palladio-facet-filter-settings></palladio-facet-filter-settings>';
+		}
 
-		componentService.register('facet', compileStringFunction);
+		componentService.register('facet', compileStringFunction, compileSettingsFunction);
+	}])
+	.directive('palladioFacetFilterSettings', [function() {
+		return {
+			require: '^palladioFacetFilter',
+			scope: { },
+			templateUrl: 'partials/palladio-facet-component/settings.html',
+			link: {
+				pre: function(scope, element, attrs, facetCtrl) {
+					scope.facetScope = facetCtrl.getScope();
+				}
+			}
+		}
 	}])
 	.directive('palladioFacetFilter', ['palladioService', 'dataService', function (palladioService, dataService) {
 		return {
@@ -53,9 +72,15 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 				showDropArea: '=',
 				showSettings: '=',
 				configDimensions: '=',
-				configAggregation: '='
+				configAggregation: '=',
+				onRemove: '&onRemove'
 			},
 			templateUrl : 'partials/palladio-facet-component/template.html',
+			controller: ['$scope', function($scope) {
+				this.getScope = function () {
+					return $scope;
+				}
+			}],
 			link : {
 				pre : function(scope, element) {
 
@@ -90,6 +115,12 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 					scope.dimensions = [];
 					scope.config = {};
 					scope.title = "Facet Filter";
+
+					scope.remove = function() {
+						scope.$destroy();
+						angular.element(element).remove();
+						scope.onRemove();
+					}
 
 					scope.dropModel = false;
 

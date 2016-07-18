@@ -9,7 +9,7 @@ var angularTemplates = require('gulp-angular-templates');
 
 var palladioSources = [ "palladio-facet-filter.js", "elastic-lists.js" ];
 var palladioCSS = [ "palladio-facet-filter.css" ];
-var palladioTemplate = [ "template.html" ];
+var palladioTemplate = [ "template.html", "settings.html" ];
 
 gulp.task('scripts', function () {
 	var files = gulp.src(palladioSources)

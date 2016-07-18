@@ -1,0 +1,69 @@
+<div class="row" data-ng-show="facetScope.showAccordion">
+  <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+    <label class="inline text-muted">Facet</label>
+  </div>
+  <div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+    <a class="btn btn-default btn-xs pull-right"
+      tooltip-animation="false"
+      tooltip-append-to-body="true"
+      tooltip-placement="left"
+      tooltip="Collapse"
+      ng-click="facetScope.collapse=true">
+      <i class="fa fa-chevron-down"></i>
+    </a>
+  </div>
+</div>
+
+<div class="row margin-top">
+  <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+    <label class="inline">Description</label>
+  </div>
+  <div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+    <input type="text" class="form-control" data-ng-model="facetScope.title" placeholder="Untitled"></input>
+  </div>
+</div>
+
+<div class="row margin-top">
+  <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+    <label class="inline">Dimensions</label>
+  </div>
+  <div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+    <span class="btn btn-default btn-modal" ng-click="facetScope.showModal()">
+      {{facetScope.fieldDescriptions() || "Choose"}}
+      <span class="caret"></span>
+    </span>
+  </div>
+</div>
+
+<div class="row margin-top">
+  <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+    <label class="inline">Count</label>
+  </div>
+  <div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+    <span class="btn btn-default btn-modal" ng-click="facetScope.showAggModal()">
+      {{facetScope.getAggDescription(facetScope.aggDim) || "Choose"}}
+      <span class="caret"></span>
+    </span>
+  </div>
+</div>
+
+<div class="row margin-top">
+  <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right ">
+  </div>
+  <div class="col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed">
+
+    <a class="small" 
+      data-ng-show="facetScope.showControls === true"
+      data-ng-click="facetScope.filterReset()">Clear</a>
+
+    <a class="text-danger pull-right"
+      data-ng-show="facetScope.showControls === true"
+      tooltip-animation="false"
+      tooltip-append-to-body="true"
+      tooltip-placement="left"
+      tooltip="Delete filter"
+      data-ng-click="facetScope.remove()">
+      <i class="fa fa-trash-o"></i>
+    </a>
+  </div>
+</div>

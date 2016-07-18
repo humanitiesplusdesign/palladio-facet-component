@@ -12,6 +12,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			//		dimensions: []
 			//		aggregation: []
 			//		height: 300px
+			//    onRemove: function() { ... }
 
 			newScope.showControls = newScope.showControls === undefined ? true : newScope.showControls;
 			newScope.showAccordion = newScope.showAccordion === undefined ? true : newScope.showAccordion;
@@ -20,6 +21,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			newScope.dimensions = newScope.dimensions === undefined ? [] : newScope.dimensions;
 			newScope.aggregation = newScope.aggregation === undefined ? [] : newScope.aggregation;
 			newScope.height = newScope.height === undefined ? "300px" : newScope.height;
+			newScope.onRemove = newScope.onRemove === undefined ? function() {} : newScope.onRemove;
 
 			var compileString = '<div data-palladio-facet-filter ';
 
@@ -28,6 +30,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			compileString += 'show-drop-area=showDropArea ';
 			compileString += 'show-settings=showSettings ';
 			compileString += 'height=height ';
+			compileString += 'on-remove=onRemove() ';
 
 			if(newScope.dimensions.length > 0) {
 				compileString += 'config-dimensions="dimensions" ';
@@ -41,8 +44,24 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 
 			return compileString;
 		};
+		
+		var compileSettingsFunction = function() {
+			return '<palladio-facet-filter-settings></palladio-facet-filter-settings>';
+		}
 
-		componentService.register('facet', compileStringFunction);
+		componentService.register('facet', compileStringFunction, compileSettingsFunction);
+	}])
+	.directive('palladioFacetFilterSettings', [function() {
+		return {
+			require: '^palladioFacetFilter',
+			scope: { },
+			templateUrl: 'partials/palladio-facet-component/settings.html',
+			link: {
+				pre: function(scope, element, attrs, facetCtrl) {
+					scope.facetScope = facetCtrl.getScope();
+				}
+			}
+		}
 	}])
 	.directive('palladioFacetFilter', ['palladioService', 'dataService', function (palladioService, dataService) {
 		return {
@@ -53,9 +72,15 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 				showDropArea: '=',
 				showSettings: '=',
 				configDimensions: '=',
-				configAggregation: '='
+				configAggregation: '=',
+				onRemove: '&onRemove'
 			},
 			templateUrl : 'partials/palladio-facet-component/template.html',
+			controller: ['$scope', function($scope) {
+				this.getScope = function () {
+					return $scope;
+				}
+			}],
 			link : {
 				pre : function(scope, element) {
 
@@ -90,6 +115,12 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 					scope.dimensions = [];
 					scope.config = {};
 					scope.title = "Facet Filter";
+
+					scope.remove = function() {
+						scope.$destroy();
+						angular.element(element).remove();
+						scope.onRemove();
+					}
 
 					scope.dropModel = false;
 
@@ -1243,5 +1274,9 @@ function elastic_list() {
 }
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-facet-component/template.html',
-        "<div class=\"row\" ng-show=\"collapse\" ng-init=\"collapse=false\">\n\t<div class=\"col-lg-12\">\n\t\t{{title}}<span class=\"text-muted margin-left small\">Facet</span>\n\t\t<a class=\"btn btn-default btn-xs pull-right\"\n\t\t\ttooltip-animation=\"false\"\n\t\t\ttooltip-append-to-body=\"true\"\n\t\t\ttooltip-placement=\"left\"\n\t\t\ttooltip=\"Expand\"\n\t\t\tng-click=\"collapse=false\">\n\t\t\t<i class=\"fa fa-chevron-up\"></i>\n\t\t</a>\n\t</div>\n</div>\n\n<div class=\"row\" ng-show=\"!collapse\">\n\n\t<div ng-class=\"{'col-lg-9': showSettings, 'col-md-8': showSettings, 'col-lg-12': !showSettings, 'col-md-12': !showSettings}\">\n\n\t\t<div class=\"facet-container\" style=\"height: {{calcHeight}}\">\n\t\t\t<div class=\"mid-facet-container\" style=\"height: {{calcHeight}};\">\n\t\t\t\t<div class=\"inner-facet-container\" style=\"height: {{calcHeight}};\"></div>\n\t\t\t\t<div ng-show=\"showDropArea === 'true'\" palladio-droppable model=\"dropModel\" class=\"facet-drop-area\" style=\"margin-top: {{dropMarginTop}};\">\n\t\t\t\t\t<div class=\"facet-drop-area-text\">\n\t\t\t\t\t\tDrop dimensions here\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\n\t\t<div class=\"well well-expand\" ng-show=\"!fieldDescriptions() && showSettings === 'true'\">Select at least one dimension on the right</div>\n\t\t<div class=\"well well-expand\" ng-show=\"!fieldDescriptions() && showSettings !== 'true'\">No dimensions configured for facet display</div>\n\n\t</div>\n\n\t<div ng-show=\"showSettings\" class=\"col-lg-3 col-md-4\">\n\n\t\t<div class=\"row\" data-ng-show=\"showAccordion\">\n\t\t\t<div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right \">\n\t\t\t\t<label class=\"inline text-muted\">Facet</label>\n\t\t\t</div>\n\t\t\t<div class=\"col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed\">\n\t\t\t\t<a class=\"btn btn-default btn-xs pull-right\"\n\t\t\t\t\ttooltip-animation=\"false\"\n\t\t\t\t\ttooltip-append-to-body=\"true\"\n\t\t\t\t\ttooltip-placement=\"left\"\n\t\t\t\t\ttooltip=\"Collapse\"\n\t\t\t\t\tng-click=\"collapse=true\">\n\t\t\t\t\t<i class=\"fa fa-chevron-down\"></i>\n\t\t\t\t</a>\n\t\t\t</div>\n\t\t</div>\n\n\t\t<div class=\"row margin-top\">\n\t\t\t<div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right \">\n\t\t\t\t<label class=\"inline\">Description</label>\n\t\t\t</div>\n\t\t\t<div class=\"col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed\">\n\t\t\t\t<input type=\"text\" class=\"form-control\" data-ng-model=\"title\" placeholder=\"Untitled\"></input>\n\t\t\t</div>\n\t\t</div>\n\n\t\t<div class=\"row margin-top\">\n\t\t\t<div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right \">\n\t\t\t\t<label class=\"inline\">Dimensions</label>\n\t\t\t</div>\n\t\t\t<div class=\"col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed\">\n\t\t\t\t<span class=\"btn btn-default btn-modal\" ng-click=\"showModal()\">\n\t\t\t\t\t{{fieldDescriptions() || \"Choose\"}}\n\t\t\t\t\t<span class=\"caret\"></span>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t</div>\n\n\t\t<div class=\"row margin-top\">\n\t\t\t<div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right \">\n\t\t\t\t<label class=\"inline\">Count</label>\n\t\t\t</div>\n\t\t\t<div class=\"col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed\">\n\t\t\t\t<span class=\"btn btn-default btn-modal\" ng-click=\"showAggModal()\">\n\t\t\t\t\t{{getAggDescription(aggDim) || \"Choose\"}}\n\t\t\t\t\t<span class=\"caret\"></span>\n\t\t\t\t</span>\n\t\t\t</div>\n\t\t</div>\n\n\t\t<div class=\"row margin-top\">\n\t\t\t<div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right \">\n\t\t\t</div>\n\t\t\t<div class=\"col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed\">\n\n\t\t\t\t<a class=\"small\" \n\t\t\t\t\tdata-ng-show=\"showControls === true\"\n\t\t\t\t\tdata-ng-click=\"filterReset()\">Clear</a>\n\n\t\t\t\t<a class=\"text-danger pull-right\"\n\t\t\t\t\tdata-ng-show=\"showControls === true\"\n\t\t\t\t \ttooltip-animation=\"false\"\n\t\t\t\t \ttooltip-append-to-body=\"true\"\n\t\t\t\t\ttooltip-placement=\"left\"\n\t\t\t\t\ttooltip=\"Delete filter\"\n\t\t\t\t \tdata-ng-click=\"$parent.removeFilter($event)\">\n\t\t\t\t\t<i class=\"fa fa-trash-o\"></i>\n\t\t\t\t</a>\n\t\t\t</div>\n\t\t</div>\n\n\n\t</div>\n\n</div>\n\n<div id=\"{{uniqueModalId}}\">\n\t<div id=\"facet-modal\" data-description=\"Choose facet dimensions\" data-modal toggle-key=\"addKey\" dimensions=\"fields\" model=\"dims\" sortable=\"false\"></div>\n\t<div id=\"facet-agg-modal\" data-description=\"Choose count dimensions\" data-modal dimensions=\"aggDims\" model=\"aggDim\" description-accessor=\"getAggDescription\"></div>\n</div>\n");
+        "<div class=\"row\" ng-show=\"collapse\" ng-init=\"collapse=false\">\n\t<div class=\"col-lg-12\">\n\t\t{{title}}<span class=\"text-muted margin-left small\">Facet</span>\n\t\t<a class=\"btn btn-default btn-xs pull-right\"\n\t\t\ttooltip-animation=\"false\"\n\t\t\ttooltip-append-to-body=\"true\"\n\t\t\ttooltip-placement=\"left\"\n\t\t\ttooltip=\"Expand\"\n\t\t\tng-click=\"collapse=false\">\n\t\t\t<i class=\"fa fa-chevron-up\"></i>\n\t\t</a>\n\t</div>\n</div>\n\n<div class=\"row\" ng-show=\"!collapse\">\n\n\t<div ng-class=\"{'col-lg-9': showSettings, 'col-md-8': showSettings, 'col-lg-12': !showSettings, 'col-md-12': !showSettings}\">\n\n\t\t<div class=\"facet-container\" style=\"height: {{calcHeight}}\">\n\t\t\t<div class=\"mid-facet-container\" style=\"height: {{calcHeight}};\">\n\t\t\t\t<div class=\"inner-facet-container\" style=\"height: {{calcHeight}};\"></div>\n\t\t\t\t<div ng-show=\"showDropArea === 'true'\" palladio-droppable model=\"dropModel\" class=\"facet-drop-area\" style=\"margin-top: {{dropMarginTop}};\">\n\t\t\t\t\t<div class=\"facet-drop-area-text\">\n\t\t\t\t\t\tDrop dimensions here\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\n\t\t<div class=\"well well-expand\" ng-show=\"!fieldDescriptions() && showSettings === 'true'\">Select at least one dimension on the right</div>\n\t\t<div class=\"well well-expand\" ng-show=\"!fieldDescriptions() && showSettings !== 'true'\">No dimensions configured for facet display</div>\n\n\t</div>\n\n\t<div ng-show=\"showSettings\" class=\"col-lg-3 col-md-4\">\n\t\t<palladio-facet-filter-settings></palladio-facet-filter-settings>\n\t</div>\n</div>\n\n<div id=\"{{uniqueModalId}}\">\n\t<div id=\"facet-modal\" data-description=\"Choose facet dimensions\" data-modal toggle-key=\"addKey\" dimensions=\"fields\" model=\"dims\" sortable=\"false\"></div>\n\t<div id=\"facet-agg-modal\" data-description=\"Choose count dimensions\" data-modal dimensions=\"aggDims\" model=\"aggDim\" description-accessor=\"getAggDescription\"></div>\n</div>\n");
+}]);
+angular.module('palladio').run(['$templateCache', function($templateCache) {
+    $templateCache.put('partials/palladio-facet-component/settings.html',
+        "<div class=\"row\" data-ng-show=\"facetScope.showAccordion\">\n  <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right \">\n    <label class=\"inline text-muted\">Facet</label>\n  </div>\n  <div class=\"col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed\">\n    <a class=\"btn btn-default btn-xs pull-right\"\n      tooltip-animation=\"false\"\n      tooltip-append-to-body=\"true\"\n      tooltip-placement=\"left\"\n      tooltip=\"Collapse\"\n      ng-click=\"facetScope.collapse=true\">\n      <i class=\"fa fa-chevron-down\"></i>\n    </a>\n  </div>\n</div>\n\n<div class=\"row margin-top\">\n  <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right \">\n    <label class=\"inline\">Description</label>\n  </div>\n  <div class=\"col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed\">\n    <input type=\"text\" class=\"form-control\" data-ng-model=\"facetScope.title\" placeholder=\"Untitled\"></input>\n  </div>\n</div>\n\n<div class=\"row margin-top\">\n  <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right \">\n    <label class=\"inline\">Dimensions</label>\n  </div>\n  <div class=\"col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed\">\n    <span class=\"btn btn-default btn-modal\" ng-click=\"facetScope.showModal()\">\n      {{facetScope.fieldDescriptions() || \"Choose\"}}\n      <span class=\"caret\"></span>\n    </span>\n  </div>\n</div>\n\n<div class=\"row margin-top\">\n  <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right \">\n    <label class=\"inline\">Count</label>\n  </div>\n  <div class=\"col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed\">\n    <span class=\"btn btn-default btn-modal\" ng-click=\"facetScope.showAggModal()\">\n      {{facetScope.getAggDescription(facetScope.aggDim) || \"Choose\"}}\n      <span class=\"caret\"></span>\n    </span>\n  </div>\n</div>\n\n<div class=\"row margin-top\">\n  <div class=\"col-lg-4 col-md-4 col-sm-4 col-xs-4 text-right \">\n  </div>\n  <div class=\"col-lg-8 col-md-8 col-md-8 col-xs-8 col-condensed\">\n\n    <a class=\"small\" \n      data-ng-show=\"facetScope.showControls === true\"\n      data-ng-click=\"facetScope.filterReset()\">Clear</a>\n\n    <a class=\"text-danger pull-right\"\n      data-ng-show=\"facetScope.showControls === true\"\n      tooltip-animation=\"false\"\n      tooltip-append-to-body=\"true\"\n      tooltip-placement=\"left\"\n      tooltip=\"Delete filter\"\n      data-ng-click=\"facetScope.remove()\">\n      <i class=\"fa fa-trash-o\"></i>\n    </a>\n  </div>\n</div>\n");
 }]);
