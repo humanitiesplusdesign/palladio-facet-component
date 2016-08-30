@@ -19,7 +19,12 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			newScope.showDropArea = newScope.showDropArea === undefined ? true : newScope.showDropArea;
 			newScope.showSettings = newScope.showSettings === undefined ? true : newScope.showSettings;
 			newScope.dimensions = newScope.dimensions === undefined ? [] : newScope.dimensions;
-			newScope.aggregation = newScope.aggregation === undefined ? [] : newScope.aggregation;
+			newScope.aggregation = newScope.aggregation === undefined ? false : {
+				key: newScope.aggregation.key,
+				type: newScope.aggregation.countable ? 'count' : 'sum',
+				field: newScope.aggregation,
+				fileId: newScope.aggregation.originFileId ? newScope.aggregation.originFileId : 0
+			};
 			newScope.height = newScope.height === undefined ? "300px" : newScope.height;
 			newScope.onRemove = newScope.onRemove === undefined ? function() {} : newScope.onRemove;
 
@@ -36,7 +41,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 				compileString += 'config-dimensions="dimensions" ';
 			}
 
-			if(newScope.aggregation.length > 0) {
+			if(newScope.aggregation) {
 				compileString += 'config-aggregation="aggregation" ';
 			}
 
