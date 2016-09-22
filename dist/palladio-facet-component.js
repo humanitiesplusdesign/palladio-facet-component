@@ -27,6 +27,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			};
 			newScope.height = newScope.height === undefined ? "300px" : newScope.height;
 			newScope.onRemove = newScope.onRemove === undefined ? function() {} : newScope.onRemove;
+			newScope.functions = {};
 
 			var compileString = '<div data-palladio-facet-filter ';
 
@@ -36,6 +37,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			compileString += 'show-settings=showSettings ';
 			compileString += 'height=height ';
 			compileString += 'on-remove=onRemove() ';
+			compileString += 'functions=functions ';
 
 			if(newScope.dimensions.length > 0) {
 				compileString += 'config-dimensions="dimensions" ';
@@ -49,12 +51,8 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 
 			return compileString;
 		};
-		
-		var compileSettingsFunction = function() {
-			return '<palladio-facet-filter-settings></palladio-facet-filter-settings>';
-		}
 
-		componentService.register('facet', compileStringFunction, compileSettingsFunction);
+		componentService.register('facet', compileStringFunction);
 	}])
 	.directive('palladioFacetFilterSettings', [function() {
 		return {
@@ -68,7 +66,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			}
 		}
 	}])
-	.directive('palladioFacetFilter', ['palladioService', 'dataService', function (palladioService, dataService) {
+	.directive('palladioFacetFilter', ['palladioService', 'dataService', '$compile', function (palladioService, dataService, $compile) {
 		return {
 			scope : {
 				height: '=',
@@ -78,7 +76,8 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 				showSettings: '=',
 				configDimensions: '=',
 				configAggregation: '=',
-				onRemove: '&onRemove'
+				onRemove: '&onRemove',
+				functions: '='
 			},
 			templateUrl : 'partials/palladio-facet-component/template.html',
 			controller: ['$scope', function($scope) {
@@ -599,6 +598,12 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 						});
 						palladioService.update();
 					};
+
+					scope.functions = {
+						getSettings: function() {
+							return element.find('.facet-settings')[0];
+						}
+					}
 
 					// State save/load.
 
@@ -1279,7 +1284,7 @@ function elastic_list() {
 }
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-facet-component/template.html',
-        "<div class=\"row\" ng-show=\"collapse\" ng-init=\"collapse=false\">\n\t<div class=\"col-lg-12\">\n\t\t{{title}}<span class=\"text-muted margin-left small\">Facet</span>\n\t\t<a class=\"btn btn-default btn-xs pull-right\"\n\t\t\ttooltip-animation=\"false\"\n\t\t\ttooltip-append-to-body=\"true\"\n\t\t\ttooltip-placement=\"left\"\n\t\t\ttooltip=\"Expand\"\n\t\t\tng-click=\"collapse=false\">\n\t\t\t<i class=\"fa fa-chevron-up\"></i>\n\t\t</a>\n\t</div>\n</div>\n\n<div class=\"row\" ng-show=\"!collapse\">\n\n\t<div ng-class=\"{'col-lg-9': showSettings, 'col-md-8': showSettings, 'col-lg-12': !showSettings, 'col-md-12': !showSettings}\">\n\n\t\t<div class=\"facet-container\" style=\"height: {{calcHeight}}\">\n\t\t\t<div class=\"mid-facet-container\" style=\"height: {{calcHeight}};\">\n\t\t\t\t<div class=\"inner-facet-container\" style=\"height: {{calcHeight}};\"></div>\n\t\t\t\t<div ng-show=\"showDropArea === 'true'\" palladio-droppable model=\"dropModel\" class=\"facet-drop-area\" style=\"margin-top: {{dropMarginTop}};\">\n\t\t\t\t\t<div class=\"facet-drop-area-text\">\n\t\t\t\t\t\tDrop dimensions here\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\n\t\t<div class=\"well well-expand\" ng-show=\"!fieldDescriptions() && showSettings === 'true'\">Select at least one dimension on the right</div>\n\t\t<div class=\"well well-expand\" ng-show=\"!fieldDescriptions() && showSettings !== 'true'\">No dimensions configured for facet display</div>\n\n\t</div>\n\n\t<div ng-show=\"showSettings\" class=\"col-lg-3 col-md-4\">\n\t\t<palladio-facet-filter-settings></palladio-facet-filter-settings>\n\t</div>\n</div>\n\n<div id=\"{{uniqueModalId}}\">\n\t<div id=\"facet-modal\" data-description=\"Choose facet dimensions\" data-modal toggle-key=\"addKey\" dimensions=\"fields\" model=\"dims\" sortable=\"false\"></div>\n\t<div id=\"facet-agg-modal\" data-description=\"Choose count dimensions\" data-modal dimensions=\"aggDims\" model=\"aggDim\" description-accessor=\"getAggDescription\"></div>\n</div>\n");
+        "<div class=\"row\" ng-show=\"collapse\" ng-init=\"collapse=false\">\n\t<div class=\"col-lg-12\">\n\t\t{{title}}<span class=\"text-muted margin-left small\">Facet</span>\n\t\t<a class=\"btn btn-default btn-xs pull-right\"\n\t\t\ttooltip-animation=\"false\"\n\t\t\ttooltip-append-to-body=\"true\"\n\t\t\ttooltip-placement=\"left\"\n\t\t\ttooltip=\"Expand\"\n\t\t\tng-click=\"collapse=false\">\n\t\t\t<i class=\"fa fa-chevron-up\"></i>\n\t\t</a>\n\t</div>\n</div>\n\n<div class=\"row\" ng-show=\"!collapse\">\n\n\t<div ng-class=\"{'col-lg-9': showSettings, 'col-md-8': showSettings, 'col-lg-12': !showSettings, 'col-md-12': !showSettings}\">\n\n\t\t<div class=\"facet-container\" style=\"height: {{calcHeight}}\">\n\t\t\t<div class=\"mid-facet-container\" style=\"height: {{calcHeight}};\">\n\t\t\t\t<div class=\"inner-facet-container\" style=\"height: {{calcHeight}};\"></div>\n\t\t\t\t<div ng-show=\"showDropArea === 'true'\" palladio-droppable model=\"dropModel\" class=\"facet-drop-area\" style=\"margin-top: {{dropMarginTop}};\">\n\t\t\t\t\t<div class=\"facet-drop-area-text\">\n\t\t\t\t\t\tDrop dimensions here\n\t\t\t\t\t</div>\n\t\t\t\t</div>\n\t\t\t</div>\n\t\t</div>\n\n\t\t<div class=\"well well-expand\" ng-show=\"!fieldDescriptions() && showSettings === 'true'\">Select at least one dimension on the right</div>\n\t\t<div class=\"well well-expand\" ng-show=\"!fieldDescriptions() && showSettings !== 'true'\">No dimensions configured for facet display</div>\n\n\t</div>\n\n\t<div class=\"facet-settings\" ng-show=\"showSettings\" class=\"col-lg-3 col-md-4\">\n\t\t<palladio-facet-filter-settings></palladio-facet-filter-settings>\n\t</div>\n</div>\n\n<div id=\"{{uniqueModalId}}\">\n\t<div id=\"facet-modal\" data-description=\"Choose facet dimensions\" data-modal toggle-key=\"addKey\" dimensions=\"fields\" model=\"dims\" sortable=\"false\"></div>\n\t<div id=\"facet-agg-modal\" data-description=\"Choose count dimensions\" data-modal dimensions=\"aggDims\" model=\"aggDim\" description-accessor=\"getAggDescription\"></div>\n</div>\n");
 }]);
 angular.module('palladio').run(['$templateCache', function($templateCache) {
     $templateCache.put('partials/palladio-facet-component/settings.html',

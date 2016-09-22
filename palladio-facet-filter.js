@@ -27,6 +27,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			};
 			newScope.height = newScope.height === undefined ? "300px" : newScope.height;
 			newScope.onRemove = newScope.onRemove === undefined ? function() {} : newScope.onRemove;
+			newScope.functions = {};
 
 			var compileString = '<div data-palladio-facet-filter ';
 
@@ -36,6 +37,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			compileString += 'show-settings=showSettings ';
 			compileString += 'height=height ';
 			compileString += 'on-remove=onRemove() ';
+			compileString += 'functions=functions ';
 
 			if(newScope.dimensions.length > 0) {
 				compileString += 'config-dimensions="dimensions" ';
@@ -49,12 +51,8 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 
 			return compileString;
 		};
-		
-		var compileSettingsFunction = function() {
-			return '<palladio-facet-filter-settings></palladio-facet-filter-settings>';
-		}
 
-		componentService.register('facet', compileStringFunction, compileSettingsFunction);
+		componentService.register('facet', compileStringFunction);
 	}])
 	.directive('palladioFacetFilterSettings', [function() {
 		return {
@@ -68,7 +66,7 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 			}
 		}
 	}])
-	.directive('palladioFacetFilter', ['palladioService', 'dataService', function (palladioService, dataService) {
+	.directive('palladioFacetFilter', ['palladioService', 'dataService', '$compile', function (palladioService, dataService, $compile) {
 		return {
 			scope : {
 				height: '=',
@@ -78,7 +76,8 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 				showSettings: '=',
 				configDimensions: '=',
 				configAggregation: '=',
-				onRemove: '&onRemove'
+				onRemove: '&onRemove',
+				functions: '='
 			},
 			templateUrl : 'partials/palladio-facet-component/template.html',
 			controller: ['$scope', function($scope) {
@@ -599,6 +598,12 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 						});
 						palladioService.update();
 					};
+
+					scope.functions = {
+						getSettings: function() {
+							return element.find('.facet-settings')[0];
+						}
+					}
 
 					// State save/load.
 
