@@ -410,8 +410,17 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 							data.dimension.remove();
 						}
 						data.dimension = scope.xfilter.dimension(function (l) { return "" + l[data.key]; });
-						var exceptionKey = scope.aggDim.key;
-						var summationKey = countDims.get(scope.aggDim.fileId).key;
+						var exceptionKey, summationKey;
+						// if(scope.aggDim.type === 'count') {
+						// 	exceptionKey = scope.aggDim.key;
+						// 	summationKey = countDims.get(scope.aggDim.fileId).key;
+						// } else { // Sum
+							exceptionKey = countDims.get(scope.aggDim.fileId).key;
+							summationKey = scope.aggDim.key;
+						// }
+						console.log(countDims)
+						console.log(summationKey)
+						console.log(scope.aggDim)
 						var countReducer = reductio()
 								.exception(function (d) { return d[exceptionKey]; })
 									.exceptionCount(true);
@@ -421,11 +430,11 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 								.exceptionCount(true);
 						var sumReducer = reductio()
 							.exception(function (d) { return d[exceptionKey]; })
-								.exceptionSum(function(d) { return d[summationKey]; });
+								.exceptionSum(function(d) { return +d[summationKey]; });
 						sumReducer.value("of")
 							.filter(function(d, nf) { return nf; })
 							.exception(function (d) { return d[exceptionKey]; })
-								.exceptionSum(function(d) { return d[summationKey]; });
+								.exceptionSum(function(d) { return +d[summationKey]; });
 						data.group = scope.aggDim.type === "count" ?
 							countReducer(data.dimension.group()) :
 							sumReducer(data.dimension.group());
