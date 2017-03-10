@@ -411,16 +411,8 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 						}
 						data.dimension = scope.xfilter.dimension(function (l) { return "" + l[data.key]; });
 						var exceptionKey, summationKey;
-						// if(scope.aggDim.type === 'count') {
-						// 	exceptionKey = scope.aggDim.key;
-						// 	summationKey = countDims.get(scope.aggDim.fileId).key;
-						// } else { // Sum
-							exceptionKey = countDims.get(scope.aggDim.fileId).key;
-							summationKey = scope.aggDim.key;
-						// }
-						console.log(countDims)
-						console.log(summationKey)
-						console.log(scope.aggDim)
+						exceptionKey = countDims.get(scope.aggDim.fileId).key;
+						summationKey = scope.aggDim.key;
 						var countReducer = reductio()
 								.exception(function (d) { return d[exceptionKey]; })
 									.exceptionCount(true);
