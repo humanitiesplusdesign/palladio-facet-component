@@ -606,6 +606,14 @@ angular.module('palladioFacetComponent', ['palladio', 'palladio.services'])
 						}
 					}
 
+					scope.functions['importState'] = function(state) {
+						importState(state)
+						return true
+					}
+					scope.functions['exportState'] = function() {
+						return exportState()
+					}
+
 					// State save/load.
 
 					var importState = function(state) {
